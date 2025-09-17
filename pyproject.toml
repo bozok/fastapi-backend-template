@@ -1,0 +1,30 @@
+[project]
+name = "clean-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.16.5",
+    "asyncpg>=0.30.0",
+    "bcrypt>=4.3.0",
+    "fastapi>=0.116.1",
+    "itsdangerous>=2.2.0",
+    "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.10.1",
+    "pydantic[email]>=2.11.9",
+    "pyjwt>=2.10.1",
+    "python-multipart>=0.0.20",
+    "redis>=6.4.0",
+    "slowapi>=0.1.9",
+    "sqlmodel>=0.0.24",
+    "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.2",
+    "ruff>=0.13.0",
+]
