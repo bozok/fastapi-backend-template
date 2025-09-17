@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     DOCS_URL: str = "/docs"
     REDOC_URL: str = "/redoc"
 
+    # Logging settings
+    LOG_LEVEL: str = "INFO"
+    ENABLE_JSON_LOGS: bool = False  # Set to True in production
+    ENABLE_AUDIT_LOGS: bool = True
+    ENABLE_PERFORMANCE_LOGS: bool = True
+    LOG_FILE_PATH: str = "logs/app.log"
+    SLOW_REQUEST_THRESHOLD: float = 1.0  # seconds
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

@@ -2,8 +2,14 @@ import string
 import random
 from fastapi import HTTPException, Request, status
 from passlib.context import CryptContext
+from app.core.config import settings
+from datetime import datetime, timedelta, timezone
+import jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 
 def hash_password(password: str) -> str:
@@ -30,3 +36,14 @@ def ip_filter(allowed_ips: list):
         return client_ip
 
     return dependency
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt

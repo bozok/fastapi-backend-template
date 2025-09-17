@@ -6,15 +6,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://fastapi_user:fastapi_password@postgres:5432/fastapi_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fastapi_user}:${POSTGRES_PASSWORD:-fastapi_password}@postgres:5432/${POSTGRES_DB:-fastapi_db}
       - REDIS_URL=redis://redis:6379
-      - REDIS_PASSWORD=
-      - ENVIRONMENT=development
-      - DEBUG=true
-      - ENABLE_RATE_LIMITING=true
-      - SECRET_KEY=super-secret-development-key-change-in-production
-      - PROJECT_NAME=FastAPI Clean Project
-      - BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080"]
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-true}
+      - ENABLE_RATE_LIMITING=${ENABLE_RATE_LIMITING:-true}
+      - SECRET_KEY=${SECRET_KEY:-super-secret-development-key-change-in-production}
+      - PROJECT_NAME=${PROJECT_NAME:-FastAPI Clean Project}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-["http://localhost:3000","http://localhost:8080"]}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - ALGORITHM=${ALGORITHM:-HS256}
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,9 +35,9 @@ services:
     image: postgres:16-alpine
     container_name: fastapi-postgres
     environment:
-      - POSTGRES_USER=fastapi_user
-      - POSTGRES_PASSWORD=fastapi_password
-      - POSTGRES_DB=fastapi_db
+      - POSTGRES_USER=${POSTGRES_USER:-fastapi_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-fastapi_password}
+      - POSTGRES_DB=${POSTGRES_DB:-fastapi_db}
     ports:
       - "5432:5432"
     volumes:
@@ -73,8 +75,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: fastapi-pgadmin
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@example.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
       - PGADMIN_LISTEN_PORT=80
     ports:
       - "5050:80"

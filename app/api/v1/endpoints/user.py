@@ -33,7 +33,7 @@ async def create_user(
 async def read_user(
     request: Request, user_id: uuid.UUID, db: AsyncSession = Depends(get_session)
 ) -> SingleResponse[UserRead]:
-    user = await user_service.get_by_id(db, user_id=user_id)
+    user = await crud_user.user.get(db, id=user_id)
     return SingleResponse(data=UserRead.model_validate(user))
 
 
