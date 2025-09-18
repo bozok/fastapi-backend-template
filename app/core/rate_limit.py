@@ -176,18 +176,47 @@ class RateLimitTiers:
 # Create the global limiter instance
 limiter = create_limiter()
 
+# Log rate limiting status
+if settings.ENABLE_RATE_LIMITING:
+    logger.info("Rate limiting is ENABLED")
+else:
+    logger.info(
+        "Rate limiting is DISABLED - all rate limit decorators will be bypassed"
+    )
+
 
 def rate_limit_by_tier(tier: str) -> Callable:
     """
     Decorator factory for applying rate limits by tier.
+    Only applies rate limiting if ENABLE_RATE_LIMITING is True.
 
     Args:
         tier: Rate limit string (e.g., "10/minute")
 
     Returns:
-        Decorator function
+        Decorator function or pass-through decorator
     """
-    return limiter.limit(tier)
+    if settings.ENABLE_RATE_LIMITING:
+        return limiter.limit(tier)
+    else:
+        # Return a no-op decorator when rate limiting is disabled
+        def no_op_decorator(func):
+            return func
+
+        return no_op_decorator
+
+
+def conditional_rate_limit(tier: str) -> Callable:
+    """
+    Conditional rate limiting decorator that respects ENABLE_RATE_LIMITING setting.
+
+    Args:
+        tier: Rate limit string (e.g., "10/minute", "5/second")
+
+    Returns:
+        Rate limiting decorator if enabled, otherwise pass-through decorator
+    """
+    return rate_limit_by_tier(tier)
 
 
 def get_rate_limit_status(request: Request) -> dict:

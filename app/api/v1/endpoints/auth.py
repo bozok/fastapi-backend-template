@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.core.rate_limit import limiter
+from app.core.rate_limit import conditional_rate_limit
 from app.api.deps import get_session
 from app.crud import user as crud_user
 from app.core.security import verify_password, create_access_token
@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 
 
 @router.post("/login")
-@limiter.limit("5/minute")  # 5 login attempts per minute
+@conditional_rate_limit("5/minute")  # 5 login attempts per minute
 async def login(
     request: Request,
     *,

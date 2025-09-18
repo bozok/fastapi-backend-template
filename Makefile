@@ -4,6 +4,10 @@
 # Default compose file
 COMPOSE_FILE := docker-compose.local.yaml
 
+# Check if pgAdmin should be enabled (default: true for development)
+ENABLE_PGADMIN := $(shell grep -E "^ENABLE_PGADMIN=" .env 2>/dev/null | cut -d'=' -f2 || echo "true")
+COMPOSE_PROFILES := $(if $(filter true,$(ENABLE_PGADMIN)),--profile dev,)
+
 # Colors for output
 GREEN := 🟢
 YELLOW := 🟡
@@ -24,16 +28,26 @@ help: ## Show this help message
 .PHONY: up
 up: ## Start all services in background
 	@echo "$(GREEN)🚀 Starting all services...$(NC)"
-	docker-compose -f $(COMPOSE_FILE) up -d
+	@if [ "$(ENABLE_PGADMIN)" = "true" ]; then \
+		echo "$(YELLOW)📋 pgAdmin enabled - starting with development profile$(NC)"; \
+		docker-compose -f $(COMPOSE_FILE) --profile dev up -d; \
+	else \
+		echo "$(YELLOW)📋 pgAdmin disabled - starting core services only$(NC)"; \
+		docker-compose -f $(COMPOSE_FILE) up -d; \
+	fi
 	@echo "$(GREEN)✅ Services started successfully!$(NC)"
 	@echo "$(YELLOW)📡 API: http://localhost:8000$(NC)"
 	@echo "$(YELLOW)📚 Docs: http://localhost:8000/docs$(NC)"
-	@echo "$(YELLOW)🔧 pgAdmin: http://localhost:5050$(NC)"
+	@if [ "$(ENABLE_PGADMIN)" = "true" ]; then \
+		echo "$(YELLOW)🔧 pgAdmin: http://localhost:5050$(NC)"; \
+	else \
+		echo "$(YELLOW)🔧 pgAdmin: DISABLED for security$(NC)"; \
+	fi
 
 .PHONY: down
 down: ## Stop and remove all containers
 	@echo "$(GREEN)🛑 Stopping all services...$(NC)"
-	docker-compose -f $(COMPOSE_FILE) down
+	docker-compose -f $(COMPOSE_FILE) --profile dev down
 	@echo "$(GREEN)✅ Services stopped successfully!$(NC)"
 
 .PHONY: restart
@@ -253,6 +267,30 @@ format: ## Format code with ruff
 	@echo "$(GREEN)🎨 Formatting code...$(NC)"
 	docker-compose -f $(COMPOSE_FILE) exec app uv run ruff format .
 	@echo "$(GREEN)✅ Code formatted!$(NC)"
+
+# pgAdmin management
+.PHONY: pgadmin-start
+pgadmin-start: ## Start pgAdmin service only
+	@echo "$(GREEN)🔧 Starting pgAdmin...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) --profile pgadmin up -d pgadmin
+	@echo "$(GREEN)✅ pgAdmin started at http://localhost:5050$(NC)"
+
+.PHONY: pgadmin-stop
+pgadmin-stop: ## Stop pgAdmin service only
+	@echo "$(GREEN)🛑 Stopping pgAdmin...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) stop pgadmin
+	@echo "$(GREEN)✅ pgAdmin stopped$(NC)"
+
+.PHONY: pgadmin-status
+pgadmin-status: ## Check if pgAdmin is enabled and running
+	@echo "$(GREEN)🔍 pgAdmin Status:$(NC)"
+	@echo "   ENABLE_PGADMIN: $(ENABLE_PGADMIN)"
+	@if [ "$(ENABLE_PGADMIN)" = "true" ]; then \
+		echo "   Status: Enabled in configuration"; \
+		docker-compose -f $(COMPOSE_FILE) ps pgadmin 2>/dev/null || echo "   Container: Not running"; \
+	else \
+		echo "   Status: Disabled in configuration"; \
+	fi
 
 # Environment setup
 .PHONY: env

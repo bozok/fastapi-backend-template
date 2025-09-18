@@ -41,6 +41,22 @@ async def lifespan(app: FastAPI):
     logger.info("📊 Database schema is managed by Alembic migrations")
     logger.info("💡 Run 'make migrate' to ensure database is up to date")
 
+    # Log documentation status
+    if settings.ENABLE_DOCS:
+        logger.info("📚 API documentation is ENABLED")
+        logger.info(f"   📖 Swagger UI: {settings.DOCS_URL}")
+        logger.info(f"   📋 ReDoc: {settings.REDOC_URL}")
+        logger.info(f"   🔧 OpenAPI: {settings.OPENAPI_URL}")
+    else:
+        logger.info("📚 API documentation is DISABLED for security")
+
+    # Log pgAdmin status
+    if settings.ENABLE_PGADMIN:
+        logger.info("🔧 pgAdmin is ENABLED for database management")
+        logger.info("   🌐 Access: http://localhost:5050 (if running)")
+    else:
+        logger.info("🔧 pgAdmin is DISABLED for security")
+
     # Log system configuration
     audit.log_security_event(
         "application_startup",
@@ -51,6 +67,8 @@ async def lifespan(app: FastAPI):
             "debug_mode": settings.DEBUG,
             "logging_level": settings.LOG_LEVEL,
             "rate_limiting": settings.ENABLE_RATE_LIMITING,
+            "api_docs": settings.ENABLE_DOCS,
+            "pgadmin": settings.ENABLE_PGADMIN,
         },
     )
 
@@ -71,24 +89,28 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=settings.OPENAPI_URL,
-    docs_url=settings.DOCS_URL,
-    redoc_url=settings.REDOC_URL,
+    openapi_url=settings.OPENAPI_URL if settings.ENABLE_DOCS else None,
+    docs_url=settings.DOCS_URL if settings.ENABLE_DOCS else None,
+    redoc_url=settings.REDOC_URL if settings.ENABLE_DOCS else None,
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
 
 # --- Logging Middleware ---
+# Build exclude paths list dynamically based on configuration
+exclude_paths = [
+    "/health",
+    "/metrics",
+    "/favicon.ico",
+]
+
+# Add documentation paths to exclude list only if docs are enabled
+if settings.ENABLE_DOCS:
+    exclude_paths.extend(["/docs", "/redoc", "/openapi.json"])
+
 app.add_middleware(
     LoggingMiddleware,
-    exclude_paths=[
-        "/health",
-        "/metrics",
-        "/favicon.ico",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
-    ],
+    exclude_paths=exclude_paths,
     mask_query_params=["password", "token", "secret", "key", "auth"],
     mask_headers=["authorization", "cookie", "x-api-key", "x-auth-token"],
 )

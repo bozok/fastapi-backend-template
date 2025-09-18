@@ -2,7 +2,7 @@ import uuid
 import math
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.core.rate_limit import limiter, RateLimitTiers
+from app.core.rate_limit import conditional_rate_limit, RateLimitTiers
 
 from app.api.deps import (
     get_pagination_params,
@@ -21,8 +21,8 @@ router = APIRouter()
 
 
 @router.post("/", response_model=SingleResponse[UserRead])
-@limiter.limit(RateLimitTiers.PUBLIC_READ)
-@limiter.limit(RateLimitTiers.BURST_PROTECTION)
+@conditional_rate_limit(RateLimitTiers.PUBLIC_READ)
+@conditional_rate_limit(RateLimitTiers.BURST_PROTECTION)
 async def create_user(
     request: Request,
     *,
@@ -43,8 +43,8 @@ async def get_my_profile(
 
 
 @router.get("/{user_id}", response_model=SingleResponse[UserRead])
-@limiter.limit(RateLimitTiers.PUBLIC_READ)
-@limiter.limit(RateLimitTiers.BURST_PROTECTION)
+@conditional_rate_limit(RateLimitTiers.PUBLIC_READ)
+@conditional_rate_limit(RateLimitTiers.BURST_PROTECTION)
 async def read_user(
     request: Request,
     user_id: uuid.UUID,
@@ -62,8 +62,8 @@ async def read_user(
 
 
 @router.get("/", response_model=PaginatedResponse[UserRead])
-@limiter.limit(RateLimitTiers.PUBLIC_READ)
-@limiter.limit(RateLimitTiers.BURST_PROTECTION)
+@conditional_rate_limit(RateLimitTiers.PUBLIC_READ)
+@conditional_rate_limit(RateLimitTiers.BURST_PROTECTION)
 async def read_users(
     request: Request,
     *,

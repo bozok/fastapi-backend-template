@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     ENABLE_DOCS: bool = True
 
     ENABLE_RATE_LIMITING: bool = False
+    ENABLE_PGADMIN: bool = True
 
     REDIS_URL: str = "redis://localhost:6379"
     REDIS_PASSWORD: str = "password"

@@ -85,9 +85,10 @@ make dev-fresh
 ### 3. Access Services
 
 - **API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **pgAdmin**: http://localhost:5050 (admin@example.com / admin)
+- **API Documentation**: http://localhost:8000/docs (if `ENABLE_DOCS=true`)
+- **ReDoc**: http://localhost:8000/redoc (if `ENABLE_DOCS=true`)
+- **OpenAPI Schema**: http://localhost:8000/openapi.json (if `ENABLE_DOCS=true`)
+- **pgAdmin**: http://localhost:5050 (if `ENABLE_PGADMIN=true`, admin@example.com / admin)
 - **Health Check**: http://localhost:8000/health
 
 ## 📁 Project Structure
@@ -215,7 +216,9 @@ SECRET_KEY="your-secret-key"
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # Features
+ENABLE_DOCS=true  # Enable/disable API documentation (disable in production)
 ENABLE_RATE_LIMITING=true
+ENABLE_PGADMIN=true  # Enable/disable pgAdmin (disable in production)
 ENABLE_AUDIT_LOGS=true
 ENABLE_PERFORMANCE_LOGS=true
 
@@ -284,9 +287,12 @@ make migration-history
 
 ### Rate Limiting
 
-- Login endpoint: 5 attempts per minute
-- Configurable rate limits via Redis
-- IP-based rate limiting support
+- **Configurable rate limiting** - Enable/disable via `ENABLE_RATE_LIMITING` environment variable
+- **Login endpoint**: 5 attempts per minute (when enabled)
+- **User endpoints**: Tiered rate limits (PUBLIC_READ, BURST_PROTECTION)
+- **Redis backend** for distributed rate limiting
+- **IP-based and API key-based** rate limiting support
+- **Graceful degradation** - When disabled, all endpoints work without rate limiting
 
 ## 🔐 Security Features
 
@@ -398,10 +404,71 @@ asyncio.run(create_superuser('admin@example.com', 'secure-password'))
 - [ ] Strong `SECRET_KEY` configured
 - [ ] Database credentials secured
 - [ ] CORS origins properly configured
-- [ ] Rate limiting enabled
+- [ ] Rate limiting enabled (`ENABLE_RATE_LIMITING=true`)
+- [ ] API documentation disabled (`ENABLE_DOCS=false`)
+- [ ] pgAdmin disabled (`ENABLE_PGADMIN=false`)
 - [ ] JSON logging enabled
 - [ ] Debug mode disabled
 - [ ] Health checks configured
+
+### 📚 API Documentation Management
+
+The project supports dynamic enabling/disabling of API documentation:
+
+**Development Mode** (`ENABLE_DOCS=true`):
+
+- Swagger UI available at `/docs`
+- ReDoc available at `/redoc`
+- OpenAPI schema at `/openapi.json`
+- Full interactive API exploration
+
+**Production Mode** (`ENABLE_DOCS=false`):
+
+- All documentation endpoints return 404
+- Reduced attack surface
+- No OpenAPI schema exposure
+- Better security posture
+
+```bash
+# Disable docs for production
+export ENABLE_DOCS=false
+
+# Enable docs for development
+export ENABLE_DOCS=true
+```
+
+### 🔧 pgAdmin Database Management
+
+The project includes optional pgAdmin for database management with security controls:
+
+**Development Mode** (`ENABLE_PGADMIN=true`):
+
+- pgAdmin accessible at http://localhost:5050
+- Default credentials: admin@example.com / admin
+- Full database management interface
+- Useful for development and debugging
+
+**Production Mode** (`ENABLE_PGADMIN=false`):
+
+- pgAdmin container not started
+- Reduced security attack surface
+- No database management web interface
+- Direct database access only
+
+```bash
+# Disable pgAdmin for production
+export ENABLE_PGADMIN=false
+
+# Enable pgAdmin for development
+export ENABLE_PGADMIN=true
+
+# pgAdmin-specific commands
+make pgadmin-start    # Start pgAdmin only
+make pgadmin-stop     # Stop pgAdmin only
+make pgadmin-status   # Check pgAdmin status
+```
+
+**Security Note**: Always disable pgAdmin in production environments as it provides direct database access through a web interface.
 
 ## 🤝 Contributing
 
