@@ -1,12 +1,11 @@
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field
-from app.models.base import BaseModel
 from typing import Optional
 import uuid
 from datetime import datetime
 
 
-class UserBase(BaseModel):
+class UserBase(SQLModel):
     email: str
     full_name: Optional[str] = None
     is_active: bool = Field(default=True)
@@ -18,8 +17,10 @@ class UserCreate(SQLModel):
     password: str
 
 
-class UserRead(UserBase):
+class UserRead(SQLModel):
     id: uuid.UUID
+    email: str
+    full_name: Optional[str] = None
 
 
 class UserUpdate(SQLModel):

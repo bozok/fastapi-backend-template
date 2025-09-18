@@ -194,10 +194,53 @@ migration-init: ## Create initial migration for existing models
 	docker-compose -f $(COMPOSE_FILE) exec app uv run alembic revision --autogenerate -m "Initial migration - User model"
 
 .PHONY: test
-test: ## Run tests in the application container
-	@echo "$(GREEN)🧪 Running tests...$(NC)"
-	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest
+test: ## Run tests with proper test database setup
+	@echo "$(GREEN)🧪 Running tests with test database...$(NC)"
+	@echo "$(YELLOW)Setting up test environment...$(NC)"
+	@echo "$(YELLOW)Creating test database if needed...$(NC)"
+	-docker-compose -f $(COMPOSE_FILE) exec postgres createdb -U fastapi_user fastapi_db_test 2>/dev/null || echo "$(YELLOW)Test database already exists$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -v --tb=short
 	@echo "$(GREEN)✅ Tests completed!$(NC)"
+
+.PHONY: test-unit
+test-unit: ## Run unit tests only
+	@echo "$(GREEN)🧪 Running unit tests...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -v --tb=short -m unit
+	@echo "$(GREEN)✅ Unit tests completed!$(NC)"
+
+.PHONY: test-integration
+test-integration: ## Run integration tests only
+	@echo "$(GREEN)🧪 Running integration tests...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -v --tb=short -m integration
+	@echo "$(GREEN)✅ Integration tests completed!$(NC)"
+
+.PHONY: test-auth
+test-auth: ## Run authentication tests only
+	@echo "$(GREEN)🧪 Running authentication tests...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -v --tb=short -m auth
+	@echo "$(GREEN)✅ Authentication tests completed!$(NC)"
+
+.PHONY: test-crud
+test-crud: ## Run CRUD tests only
+	@echo "$(GREEN)🧪 Running CRUD tests...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -v --tb=short -m crud
+	@echo "$(GREEN)✅ CRUD tests completed!$(NC)"
+
+.PHONY: test-coverage
+test-coverage: ## Run tests with coverage report
+	@echo "$(GREEN)🧪 Running tests with coverage...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest --cov=app --cov-report=term-missing --cov-report=html
+	@echo "$(GREEN)✅ Coverage report generated!$(NC)"
+
+.PHONY: test-watch
+test-watch: ## Run tests in watch mode for development
+	@echo "$(GREEN)🧪 Running tests in watch mode...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -f --tb=short
+
+.PHONY: test-debug
+test-debug: ## Run tests with detailed output for debugging
+	@echo "$(GREEN)🧪 Running tests in debug mode...$(NC)"
+	docker-compose -f $(COMPOSE_FILE) exec app uv run pytest -vvv --tb=long --show-capture=all
 
 .PHONY: lint
 lint: ## Run linting checks

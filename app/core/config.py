@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     PROJECT_NAME: str = "My FastAPI App"
     DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost/dbname"
+    DATABASE_URL_TEST: str = "postgresql+asyncpg://user:password@localhost/dbname_test"
     # Security settings
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"]
     SECRET_KEY: str = "super-secret-key-placeholder"

@@ -11,6 +11,7 @@ class User(BaseModel, table=True):
     full_name: Optional[str] = None
     hashed_password: str = Field(nullable=False)
     is_active: Optional[bool] = Field(default=True)
+    is_superuser: Optional[bool] = Field(default=False)
     last_login: Optional[datetime] = Field(
         default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
     )

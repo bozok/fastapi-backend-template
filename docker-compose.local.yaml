@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-fastapi_user}:${POSTGRES_PASSWORD:-fastapi_password}@postgres:5432/${POSTGRES_DB:-fastapi_db}
+      - DATABASE_URL_TEST=postgresql+asyncpg://${POSTGRES_USER:-fastapi_user}:${POSTGRES_PASSWORD:-fastapi_password}@postgres:5432/${POSTGRES_DB:-fastapi_db}_test
       - REDIS_URL=redis://redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - ENVIRONMENT=${ENVIRONMENT:-development}

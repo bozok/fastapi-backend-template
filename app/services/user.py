@@ -89,12 +89,15 @@ class UserService:
             )
 
         # 4. Create the User
-        user_in.email = user_in.email.strip()
-        user_in.full_name = user_in.full_name.strip()
-        user_in.password = hashed_password
+        # Create new UserCreate object with hashed password, preserving original
+        user_create_data = UserCreate(
+            email=user_in.email.strip(),
+            full_name=user_in.full_name.strip(),
+            password=hashed_password,  # Use hashed password
+        )
 
         try:
-            created_user = await crud_user.create(db=db, obj_in=user_in)
+            created_user = await crud_user.create(db=db, obj_in=user_create_data)
 
             # Log successful user creation
             logger.info(
@@ -175,7 +178,7 @@ class UserService:
             resource=f"user:{user_id}",
             details={
                 "updated_user_id": user_id,
-                "updated_fields": user_in.dict(exclude_unset=True),
+                "updated_fields": user_in.model_dump(exclude_unset=True),
             },
         )
 

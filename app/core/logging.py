@@ -2,7 +2,7 @@
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, ClassVar, Set
 
@@ -233,7 +233,7 @@ class AuditLogger:
                 "success": success,
                 "ip_address": ip_address,
                 "user_agent": user_agent,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -251,7 +251,7 @@ class AuditLogger:
                 "action": action,
                 "resource": resource,
                 "details": details or {},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -269,7 +269,7 @@ class AuditLogger:
                 "resource_type": resource_type,
                 "resource_id": resource_id,
                 "operation": operation,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -290,7 +290,7 @@ class AuditLogger:
                 "description": description,
                 "severity": severity,
                 "details": details or {},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
