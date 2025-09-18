@@ -29,6 +29,7 @@ A production-ready, clean startup boilerplate for FastAPI projects with comprehe
 - **Coverage reporting** with pytest-cov
 - **Async test fixtures** for database and HTTP client testing
 - **Security testing** for authentication and authorization
+- **Pre-commit hooks** with ruff linting, formatting, and automated testing
 
 ### 📊 **Observability & Monitoring**
 
@@ -184,6 +185,22 @@ make test-watch     # Run tests in watch mode
 ```bash
 make lint           # Run linting checks
 make format         # Format code with ruff
+```
+
+### Pre-commit Hooks
+
+```bash
+# Install pre-commit (one-time setup)
+pip install pre-commit
+pre-commit install
+
+# Pre-commit will now automatically run on every commit:
+# - Ruff linting with auto-fix
+# - Ruff code formatting
+# - Full test suite in Docker container
+
+# Manual pre-commit run (optional)
+pre-commit run --all-files
 ```
 
 ### Utility Commands
@@ -475,19 +492,66 @@ make pgadmin-status   # Check pgAdmin status
 ### Development Setup
 
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Make changes and ensure tests pass: `make test`
-4. Commit changes: `git commit -m 'Add amazing feature'`
-5. Push to branch: `git push origin feature/amazing-feature`
-6. Create Pull Request
+2. Clone and setup: `git clone <repo> && cd clean-project`
+3. **Install pre-commit hooks**: `pip install pre-commit && pre-commit install`
+4. Create feature branch: `git checkout -b feature/amazing-feature`
+5. Start development environment: `make dev`
+6. Make changes following the code standards below
+7. Commit changes (pre-commit hooks will run automatically)
+8. Push to branch: `git push origin feature/amazing-feature`
+9. Create Pull Request
 
-### Code Standards
+### Code Quality & Standards
+
+**🔍 Automated Quality Checks (Pre-commit Hooks):**
+
+- ✅ **Ruff Linting** with auto-fix (`ruff check --fix`)
+- ✅ **Code Formatting** with ruff (`ruff format`)
+- ✅ **Full Test Suite** runs in Docker (`make test`)
+- ✅ **Type Checking** via ruff's comprehensive rules
+- ✅ **Import Sorting** and organization
+
+**📋 Code Standards:**
 
 - **Type hints** for all functions and methods
 - **Docstrings** for public APIs
 - **Test coverage** for new features
 - **Error handling** with proper HTTP status codes
 - **Async/await** for all I/O operations
+- **Security best practices** (no hardcoded secrets, input validation)
+
+**🔄 Development Workflow:**
+
+```bash
+# Your commits will automatically:
+# 1. Fix linting issues
+# 2. Format code consistently
+# 3. Run full test suite
+# 4. Prevent commit if tests fail
+
+git add .
+git commit -m "Add feature"  # Pre-commit runs automatically
+
+# Manual quality checks (optional):
+make lint    # Check code quality
+make format  # Format code
+make test    # Run tests
+pre-commit run --all-files  # Run all hooks manually
+```
+
+**🛠️ Pre-commit Configuration:**
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    hooks:
+      - id: ruff-check # Linting with auto-fix
+      - id: ruff-format # Code formatting
+  - repo: local
+    hooks:
+      - id: pytest-docker # Tests in Docker
+```
 
 ## 📚 Documentation
 
